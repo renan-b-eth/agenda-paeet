@@ -56,7 +56,21 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="text-center py-6 border-t text-sm text-zinc-500">
-        Agenda PAEET © {new Date().getFullYear()} — Sistema de Gerenciamento de Estágios
+        <p>
+          Agenda PAEET © {new Date().getFullYear()} — Desenvolvido por{" "}
+          <a
+            href="https://rendey.store"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-blue-600 hover:underline"
+          >
+            Rendey LLC
+          </a>{" "}
+          —{" "}
+          <a href="https://rendey.store" target="_blank" rel="noopener noreferrer" className="hover:underline">
+            rendey.store
+          </a>
+        </p>
       </footer>
     </div>
   );
