@@ -1,19 +1,117 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model Agenda {
-  id        Int      @id @default(autoincrement())
-  title     String
-  date      DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id               String             @id @default(uuid())
+  name             String
+  email            String             @unique
+  passwordHash     String
+  escola           String             @default("")
+  cursoTecnico     String             @default("")
+  createdAt        DateTime           @default(now())
+  Estagiario       Estagiario[]
+  PushSubscription PushSubscription[]
+  Reminder         Reminder[]
+  Student          Student[]
+  WeeklyAgendaSlot WeeklyAgendaSlot[]
+
+  @@map("User")
+}
+
+model Estagiario {
+  id                 String            @id
+  userId             String
+  nome               String
+  cursoSerie         String            @default("")
+  ra                 String            @default("")
+  empresa            String            @default("")
+  responsavelEmpresa String            @default("")
+  telResponsavel     String            @default("")
+  dataInicio         DateTime?
+  dataTermino        DateTime?
+  User               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  RegistroEstagio    RegistroEstagio[]
+}
+
+model FichaApoio {
+  id                   String    @id
+  studentId            String
+  data                 DateTime  @default(now())
+  frequencia           Float     @default(0)
+  provaPaulista1Bim    Float?
+  provaPaulista2Bim    Float?
+  provaPaulista3Bim    Float?
+  habilidadesDefasagem String    @default("")
+  encaminhamentos      String    @default("")
+  prazo                DateTime?
+  evidencia            String    @default("")
+  status               String    @default("PENDENTE")
+  Student              Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id       String @id
+  userId   String
+  endpoint String
+  p256dh   String
+  auth     String
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+}
+
+model RegistroEstagio {
+  id                    String     @id
+  estagiarioId          String
+  dia                   DateTime
+  atividadeDesenvolvida String     @default("")
+  assinaturaResponsavel Boolean    @default(false)
+  assinaturaEstagiario  Boolean    @default(false)
+  Estagiario            Estagiario @relation(fields: [estagiarioId], references: [id], onDelete: Cascade)
+
+  @@unique([estagiarioId, dia])
+}
+
+model Reminder {
+  id        String   @id
+  userId    String
+  titulo    String
+  descricao String   @default("")
+  data      DateTime
+  hora      String   @default("")
+  origem    String   @default("MANUAL")
+  concluido Boolean  @default(false)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Student {
+  id         String       @id
+  userId     String
+  nome       String
+  turma      String       @default("")
+  curso      String       @default("")
+  ativo      Boolean      @default(true)
+  FichaApoio FichaApoio[]
+  User       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WeeklyAgendaSlot {
+  id        String   @id
+  userId    String
+  weekStart DateTime
+  weekEnd   DateTime
+  dayOfWeek String
+  period    String
+  activity  String   @default("")
+  notes     String   @default("")
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart, dayOfWeek, period])
 }
